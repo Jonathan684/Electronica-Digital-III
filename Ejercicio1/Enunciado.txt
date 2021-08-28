@@ -1,0 +1,7 @@
+Ejercicio propuesto.
+Generar un archivo header y c para control de puerto GPIO.
+¿Cómo sería?
+1-Crear funciones de configuración. Paso el puerto, paso el pin, y entrada-salida.
+2- Crear funciones de seteo.
+3- Crear funciones de status.
+4- Probarlo.
