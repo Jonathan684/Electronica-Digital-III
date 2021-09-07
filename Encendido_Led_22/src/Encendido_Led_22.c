@@ -23,12 +23,11 @@ int main(void) {
 
 	uint32_t verClk;
 	verClk = SystemCoreClock;  //Se verifica la frecuencia del CPU
-	LPC_GPIO0 -> FIODIR |= (1<<22);
-
+	LPC_GPIO0 -> FIODIR |= (1<<0);
 	while(1) {
-		LPC_GPIO0->FIOSET = (1<<22);// pone en alto al pin 22, encendiendo el led.
+		LPC_GPIO0->FIOSET = (1<<0);// pone en alto al pin 22, encendiendo el led.
 		retardo(); // Invoca a la funcion retardo.
-		LPC_GPIO0-> FIOCLR = (1<<22); // pone en cero al pin 22, apagandp el led.
+		LPC_GPIO0-> FIOCLR = (1<<0); // pone en cero al pin 22, apagandp el led.
 		retardo(); // Invoca a la funcion retarado.
 	}// Fin del while
     return 0 ;
