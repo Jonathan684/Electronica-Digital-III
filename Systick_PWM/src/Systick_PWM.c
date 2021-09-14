@@ -1,7 +1,7 @@
 /*
 ===============================================================================
- Name        SECUENCIAS CON ARREGLO IAN.c
- Author      : $(author)ERIK CONCEPCION ALVARADO
+ Name        Systick PWM
+ Author      : $(author) Patiño
  Version     :
  Copyright   : $(copyright)
  Description : main definition
@@ -40,8 +40,7 @@ void confIntGPIO(void);
 void confSystick(void);
 uint8_t contador = 0;
 const uint8_t cont_final = 10;
-uint8_t cont_duty = 1;
-
+uint8_t cont_duty= 1;
 
 int main(void){
 
@@ -49,35 +48,29 @@ int main(void){
     confIntExt();
     confIntGPIO();
     confSystick();
+
     while(1){
 
         while (contador < cont_duty)
         {
-            LPC_GPIO0->FIOSET |= (1<<22);
+            LPC_GPIO2->FIOSET |= (1<<0);
         }
 
-        LPC_GPIO0->FIOCLR |= (1<<22);
+        LPC_GPIO2->FIOCLR |= (1<<0);
 
         if(contador == cont_final)
         {
             contador = 0;
         }
-
-
-      /*  if(contador == cont_duty) // contador == 1
-        {
-            LPC_GPIO0->FIOCLR |= (1<<22);
-        }
-        */
-
-    }
+}
     return 0;
 }
 void confGPIO(void){
     //P0.22
-    LPC_PINCON -> PINSEL1 &= ~(0b11 << 12);  // PINSEL1 13:12
-    LPC_GPIO0 -> FIODIR |= (1<<22); //SALIDA
-    LPC_PINCON -> PINMODE1 &= ~(0b11 << 12); //PINMODE1 13:12 pullup
+    //LPC_PINCON -> PINSEL1 &= ~(0b11 << 12);  // PINSEL1 13:12
+    LPC_GPIO2 -> FIODIR |= (1<<0); //SALIDA
+    LPC_PINCON -> PINMODE4 &= ~(0b11 << 0); //PINMODE1 1:0 pullup
+    LPC_GPIO2->FIOCLR |= (1<<0);
     //P0.0
     LPC_PINCON -> PINSEL1 &= ~(0b11 << 0);  // PINSEL0 1:0
     LPC_GPIO0 -> FIODIR &= ~(1<<0); //ENTRADA
@@ -88,8 +81,12 @@ void confIntGPIO(void){
    LPC_GPIOINT -> IO0IntEnF |= (1 << 0); //Selecciono la interrupcion por flanco de bajada
    LPC_GPIOINT -> IO0IntClr |= (1 << 0); //Limpia la bandera
    NVIC_EnableIRQ(EINT3_IRQn); //Habilita las interrupciones por GPIO
+   NVIC_SetPriority(EINT3_IRQn, 2);
 }
 
+/*
+ * Configuracion de una interrupcion externa.
+ */
 void confIntExt(void){
    //P2.10 (funcion de EINT)
     LPC_PINCON -> PINSEL4 |= (1 << 20);  // PINSEL4 21:20  (0 1)
@@ -97,6 +94,7 @@ void confIntExt(void){
     LPC_SC -> EXTPOLAR |= 1; //Interrumpe cuando el flanco es de subida (tabla 12 pag 28)
     LPC_SC -> EXTINT |= 1; //Limpia la bandera de interrupciones externas.
     NVIC_EnableIRQ(EINT0_IRQn); //Habilita las interrupciones externas.
+    NVIC_SetPriority(EINT0_IRQn, 1);
 }
 
 /*
@@ -108,7 +106,7 @@ void confIntExt(void){
 void confSystick(void){
     SysTick -> CTRL = 0; // Deshabilito el systick
     SysTick -> LOAD = 99999UL; //
-    NVIC_SetPriority(SysTick_IRQn, 1); // Setea prioridades, por defecto esta en -1
+    NVIC_SetPriority(SysTick_IRQn, 3); // Setea prioridades, por defecto esta en -1
     SysTick ->VAL = 0; //Limpia el valor actual
     SysTick ->CTRL = 0x00000007; // Enable = 1 TickInt = 1 Clock Source = 1
     //NVIC_EnableIRQ(SysTick_IRQn); // Habilita la interrupcion
@@ -124,7 +122,13 @@ void EINT3_IRQHandler(void){
 
 
    if((LPC_GPIOINT->IO0IntEnF) & (1<<0)){
-	   //systick ++;
+	   if(cont_duty == 9){
+		   cont_duty = 1;
+	   }
+	   else
+	   {
+		   cont_duty ++;
+	   }
    }
    LPC_GPIOINT->IO0IntClr |= (1<<0);
 }
@@ -135,12 +139,12 @@ void EINT3_IRQHandler(void){
  * P[2]10
  */
 void EINT0_IRQHandler(void){
-	//systick ++;
+	cont_duty = 1;
 	LPC_SC ->EXTINT |= 1;// limpio la bandera de interrupcion
 }
 
 void SysTick_Handler(){
-    contador ++ ;
+    contador ++;
   /*  if((contador % cont_final) == 0)
     {
         contador = 0
