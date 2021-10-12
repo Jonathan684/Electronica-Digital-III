@@ -33,6 +33,7 @@ PWM 10% 20% .... 100% 10%
 */
 
 #include "LPC17xx.h"
+#include "lpc17xx_pinsel.h"
 
 void confGPIO(void);
 void confIntExt(void);
@@ -50,15 +51,15 @@ int main(void){
     confSystick();
 
     while(1){
-
+    	//Parte encendida
         while (contador < cont_duty)
         {
             LPC_GPIO2->FIOSET |= (1<<0);
         }
-
+        //Parte apagada
         LPC_GPIO2->FIOCLR |= (1<<0);
 
-        if(contador == cont_final)
+        if(contador == cont_final && 1)
         {
             contador = 0;
         }
@@ -66,6 +67,7 @@ int main(void){
     return 0;
 }
 void confGPIO(void){
+
     //P0.22
     //LPC_PINCON -> PINSEL1 &= ~(0b11 << 12);  // PINSEL1 13:12
     LPC_GPIO2 -> FIODIR |= (1<<0); //SALIDA
@@ -80,8 +82,8 @@ void confGPIO(void){
 void confIntGPIO(void){
    LPC_GPIOINT -> IO0IntEnF |= (1 << 0); //Selecciono la interrupcion por flanco de bajada
    LPC_GPIOINT -> IO0IntClr |= (1 << 0); //Limpia la bandera
+   NVIC_SetPriority(EINT3_IRQn, 0);
    NVIC_EnableIRQ(EINT3_IRQn); //Habilita las interrupciones por GPIO
-   NVIC_SetPriority(EINT3_IRQn, 2);
 }
 
 /*
@@ -93,8 +95,9 @@ void confIntExt(void){
     LPC_SC -> EXTMODE |= 1; //Selecciona interrupcion por flanco (tabla 11 pag 28)
     LPC_SC -> EXTPOLAR |= 1; //Interrumpe cuando el flanco es de subida (tabla 12 pag 28)
     LPC_SC -> EXTINT |= 1; //Limpia la bandera de interrupciones externas.
+    NVIC_SetPriority(EINT3_IRQn, 1);
     NVIC_EnableIRQ(EINT0_IRQn); //Habilita las interrupciones externas.
-    NVIC_SetPriority(EINT0_IRQn, 1);
+
 }
 
 /*
@@ -105,11 +108,13 @@ void confIntExt(void){
  */
 void confSystick(void){
     SysTick -> CTRL = 0; // Deshabilito el systick
-    SysTick -> LOAD = 99999UL; //
-    NVIC_SetPriority(SysTick_IRQn, 3); // Setea prioridades, por defecto esta en -1
+    SysTick -> LOAD = 9999999UL; //
+    //NVIC_SetPriority(SysTick_IRQn, 0); // Setea prioridades, por defecto esta en -1
     SysTick ->VAL = 0; //Limpia el valor actual
     SysTick ->CTRL = 0x00000007; // Enable = 1 TickInt = 1 Clock Source = 1
+    NVIC_SetPriority(SysTick_IRQn, 0);
     //NVIC_EnableIRQ(SysTick_IRQn); // Habilita la interrupcion
+    //SysTick_Config(ticks)
 }
 
 
@@ -120,8 +125,7 @@ void confSystick(void){
  */
 void EINT3_IRQHandler(void){
 
-
-   if((LPC_GPIOINT->IO0IntEnF) & (1<<0)){
+   if((LPC_GPIOINT->IO0IntEnF) & (1<<0)){ //Pregunto si se interrumpio por el flanco descendente en el pin 0.
 	   if(cont_duty == 9){
 		   cont_duty = 1;
 	   }
@@ -130,7 +134,7 @@ void EINT3_IRQHandler(void){
 		   cont_duty ++;
 	   }
    }
-   LPC_GPIOINT->IO0IntClr |= (1<<0);
+   LPC_GPIOINT->IO0IntClr |= (1<<0); //Bajo la bandera
 }
 
 /*
@@ -145,6 +149,8 @@ void EINT0_IRQHandler(void){
 
 void SysTick_Handler(){
     contador ++;
+    SysTick->CTRL &= SysTick ->CTRL;
+    //SysTick->CTRL &= (~(1<<16));
   /*  if((contador % cont_final) == 0)
     {
         contador = 0
