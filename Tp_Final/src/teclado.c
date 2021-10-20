@@ -1,7 +1,7 @@
 /*
 ===============================================================================
  Name        : Teclado.c
- Author      : $Jonathan Patiño
+ Author      : $ Grupo II
  Version     :
  Copyright   : $(copyright)
  Description : main definition
@@ -38,36 +38,37 @@ char teclas[4][3] = {{'1','2','3'},
                      {'*','0','#'}};
 
 char contraseña[] = {'1','2','3'} ;
+char _completa[] =  {'0','0','0'} ;
 uint32_t completa = 0;
 uint8_t  Incrementar = 0;
 
 void confGPIO(void);
 void confIntGPIO(void);
 void antirebote(void);
-int main(void) {
-
-    printf("Teclado Matricial \n");
-    confGPIO();
-    confIntGPIO();
-    //GPIO_SetValue(PUERTO_2, PIN_0);
-
-    while(1) {
-
-    	if(completa == 3){
-    		printf("Acceso correcto\n");
-    		completa = 0;
-    		Incrementar = 0;
-          }
-
-    }
-    return 0 ;
-}
+//int main(void) {
+//
+//    printf("Teclado Matricial \n");
+//    confGPIO();
+//    confIntGPIO();
+//    //GPIO_SetValue(PUERTO_2, PIN_0);
+//
+//    while(1) {
+//
+//    	if(completa == 3){
+//    		printf("Acceso correcto\n");
+//    		completa = 0;
+//    		Incrementar = 0;
+//          }
+//
+//    }
+//    return 0 ;
+//}
 void confGPIO(void){
 
     LPC_GPIO2->FIODIR    |= ((1<<0)|(1<<1)|(1<<2)|(1<<3)); //Pines 0,1,2,3 como salidas 4 Filas
-    LPC_GPIO2->FIOCLR   |= ((1<<0)|(1<<1)|(1<<2)|(1<<3));  //Pongo un cero en la salida
-    LPC_GPIO2->FIODIR    &= ~((1<<4)|(1<<5)|(1<<6));          //Pines 4,5,6,7 como entradas    3 Columnas
-	LPC_PINCON->PINMODE4 &= ~((1<<4)|(1<<5)|(1<<6)); 	   //HABILITO LAS PULLUP para las columnas
+    LPC_GPIO2->FIOCLR    |= ((1<<0)|(1<<1)|(1<<2)|(1<<3));  //Pongo un cero en la salida
+    LPC_GPIO2->FIODIR    &= ~((1<<4)|(1<<5)|(1<<6));       //Pines 4,5,6,7 como entradas    3 Columnas
+	  LPC_PINCON->PINMODE4 &= ~((1<<4)|(1<<5)|(1<<6)); 	     //HABILITO LAS PULLUP para las columnas
 }
 /*
  * Configuracion de las interrupciones por GPIO.
@@ -132,12 +133,12 @@ void EINT3_IRQHandler(void){
    else if((LPC_GPIOINT->IO2IntStatF) & (1<<6)){ //Pregunto si se interrumpio por el flanco descendente en el pin 4.
         for (int nL = 0; nL <= 3; nL++)
                  {
-                       	    LPC_GPIO2->FIOSET |= (1<<nL);
+                       	    LPC_GPIO2->FIOSET |= (1<<nL);  // p2[0]=1 p2[1]=1 p2[2]=1 p2[3]=1 
                        	    //Barrido en columnas buscando un LOW
                                 if (((LPC_GPIO2->FIOPIN) & (1<<6))) //Deberia entrar cada vez que esta en 1
                                   {
-                               	 printf("Tecla: %c\n",teclas[nL][2]);
-                               	if(contraseña[nL] == teclas[nL][0]){
+                               	  printf("Tecla: %c\n",teclas[nL][2]);
+                               	    if(contraseña[nL] == teclas[nL][0]){
                                	    printf("Coincidencia \n");
                                	      if(completa == 2 && Incrementar == 3){
                                		      	completa = 3;
@@ -157,75 +158,3 @@ void EINT3_IRQHandler(void){
 void antirebote(void){
 	for (int i;i<1000000;i++){}
 }
-/*
- * Configuracion de Filas
- */
-//Salida P2[0] Filas
-/*uint8_t i;
-int aux = pinesFilas[0];
-//for(i=0 ;i<4;i++){
-	    conf_pin->Portnum = PINSEL_PORT_2;  // Puerto 2
-		conf_pin->Pinnum  = PINSEL_PIN_0;   // Funcion pin 0
-		conf_pin->Funcnum = PINSEL_FUNC_0;  // Funcion GPIO
-		conf_pin->Pinmode = PINSEL_PINMODE_PULLUP; //Modo pull-up por defecto
-		conf_pin->OpenDrain = PINSEL_PINMODE_NORMAL; // Sin open drain
-		PINSEL_ConfigPin(conf_pin);
-		GPIO_SetDir(PUERTO_2, pinesFilas[i] , SALIDA);
-		GPIO_ClearValue(PUERTO_2, pinesFilas[i] ); // Todas las filas le ponemos un 0
-//}
-*/
-
-//uint32_t pinesColumnas[] = {6,5,4};
-//Entrada P2[4] Columnas
-/*	for(i=0;i<3;i++){
-	conf_pin->Portnum = PINSEL_PORT_2;	// Puerto 2
-	conf_pin->Pinnum  = ((uint32_t)(1<<pinesColumnas[i]));	// Funcion pin 4
-	conf_pin->Funcnum = PINSEL_FUNC_0;  // Funcion GPIO
-	conf_pin->Pinmode = PINSEL_PINMODE_PULLUP; //Modo pull-up
-	conf_pin->OpenDrain = PINSEL_PINMODE_NORMAL; // Sin open drain
-	PINSEL_ConfigPin(conf_pin);
-	GPIO_SetDir(PUERTO_2, pinesColumnas[i] , ENTRADA);
-*/
-//}
-
-/*PINSEL_CFG_Type *conf_pin;
-
-	conf_pin->Portnum = PINSEL_PORT_0;
-	conf_pin->Pinnum  = PINSEL_PIN_22;
-	conf_pin->Funcnum = PINSEL_FUNC_0;
-	conf_pin->Pinmode = PINSEL_PINMODE_PULLUP;
-	conf_pin->OpenDrain = PINSEL_PINMODE_NORMAL;
-
-	PINSEL_ConfigPin(conf_pin);
-	GPIO_SetDir(PUERTO_0, PIN_22 , SALIDA);
-
-	conf_pin->Portnum = PINSEL_PORT_2;
-	conf_pin->Pinnum  = PINSEL_PIN_0;
-	conf_pin->Funcnum = PINSEL_FUNC_0;
-	conf_pin->Pinmode = PINSEL_PINMODE_PULLUP;
-	conf_pin->OpenDrain = PINSEL_PINMODE_NORMAL;
-
-	PINSEL_ConfigPin(conf_pin);
-	GPIO_SetDir(PUERTO_2, PIN_0 , SALIDA);*/
-/*void Delay(){
-	int i=0;
-	for(i=0;i<100;i++){}
-}*/
-/*GPIO_SetValue(PUERTO_2, pines_Filas); // Se colocan todos los bit de filas en 1
-	   for(){
-		   GPIO_ClearValue(PUERTO_2, pines_Filas); // Luego voy poniendo uno por uno en 0 hasta encontarla la fila y columna que necesito.
-	   }
-
-
-	   uint32_t aux = (LPC_GPIO2->FIOPIN) & (1<<4);
-	       	if(((LPC_GPIO2->FIOPIN) & (1<<4)) == 0) // Pregunto si en el cuarto bit entro un cero
-	       	{
-	       		printf("Presionada \n");
-	       	}
-	       	GPIO_SetValue(PUERTO_2, PIN_0);
-	       	/*GPIO_ClearValue(PUERTO_0, PIN_22);
-	       	Delay();
-	       	GPIO_SetValue(PUERTO_0, PIN_22);
-	       	Delay();*/
-
-	       	//Delay();*/

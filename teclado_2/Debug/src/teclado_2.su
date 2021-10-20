@@ -1,0 +1,6 @@
+../src/teclado_2.c:44:5:main	8	static
+../src/teclado_2.c:61:6:PinConfig	4	static
+../src/teclado_2.c:79:9:ScanearTeclado	16	static
+../src/teclado_2.c:157:6:retardo	16	static
+../src/teclado_2.c:164:6:Set_UART3	32	static
+../src/teclado_2.c:186:6:enviar	8	static

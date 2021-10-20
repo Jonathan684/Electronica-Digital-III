@@ -42,6 +42,8 @@ uint32_t aux3 = 0;
 uint8_t i = 0;
 uint8_t MatchChannel = 0;
 uint8_t x = 0;
+uint32_t MR0_array[10]= {1000,500}; //para generar señales de [1000Hz-500Hz]
+
 int main(void) {
 	SystemInit();
 	confGPIO();
@@ -49,27 +51,42 @@ int main(void) {
 
     while(1) {
 
+
     	if(x == 10){
-    		TIM_UpdateMatchValue(LPC_TIM1,0, 9000);
-    		LPC_TIM1 ->EMR &= ~(1<<0);
-    		TIM_ResetCounter(LPC_TIM1);
-    		x ++;
-    	}
-    	if(x == 20){
-    		TIM_UpdateMatchValue(LPC_TIM1,0, 5000);
-    		LPC_TIM1 ->EMR &= ~(1<<0);
-    		TIM_ResetCounter(LPC_TIM1);
+//    		TIM_UpdateMatchValue(LPC_TIM1,0, 9000);
+//    		LPC_TIM1 ->EMR &= ~(1<<0);
+//    		TIM_ResetCounter(LPC_TIM1);
+//
+
+    		TIM_Cmd(LPC_TIM1, DISABLE);
+    		TIM_UpdateMatchValue(LPC_TIM1, 0, MR0_array[0]);
+    		TIM_Cmd(LPC_TIM1, ENABLE);
+    		TIM_ResetCounter(LPC_TIM1); //No olvidar reset
     		x ++;
     	}
     	if(x == 30){
-    		TIM_UpdateMatchValue(LPC_TIM1,0, 1000);
-    		LPC_TIM1 ->EMR &= ~(1<<0);
-    		TIM_ResetCounter(LPC_TIM1);
-    		x++;
+//    		TIM_UpdateMatchValue(LPC_TIM1,0, 5000); //Actualizo el match
+//    		LPC_TIM1 ->EMR &= ~(1<<0);  			//Deshabilito la interrupcion
+//    		TIM_ResetCounter(LPC_TIM1); 			//Reseteo el contardor
+//    		x ++;
+    		TIM_Cmd(LPC_TIM1, DISABLE);
+    		TIM_UpdateMatchValue(LPC_TIM1, 0, MR0_array[1]);
+    		TIM_Cmd(LPC_TIM1, ENABLE);
+    		TIM_ResetCounter(LPC_TIM1); //No olvidar reset
+    		x ++;
     	}
-    	if(x == 100){
-    		x = 0;
-    	}
+    	if(x == 50) x = 0;
+
+
+//    	if(x == 30){
+//    		TIM_UpdateMatchValue(LPC_TIM1,0, 1000);
+//    		LPC_TIM1 ->EMR &= ~(1<<0);
+//    		TIM_ResetCounter(LPC_TIM1);
+//    		x++;
+//    	}
+//    	if(x == 100){
+//    		x = 0;
+//    	}
     }
 	return 0 ;
 }
@@ -86,10 +103,10 @@ void confGPIO(void){
 	 PINSEL_ConfigPin(&pin_configuration);
 
 	 ////////  Modo captura ////////////////////////////////////
-	 pin_configuration.Portnum 	=	PINSEL_PORT_1;
+	 pin_configuration.Portnum 	=	PINSEL_PORT_1; // P[1]26
 	 pin_configuration.Pinnum	=	PINSEL_PIN_26;
-	 pin_configuration.Funcnum	= 	PINSEL_FUNC_3;
-	 pin_configuration.Pinmode   =   PINSEL_PINMODE_PULLUP;
+	 pin_configuration.Funcnum	= 	PINSEL_FUNC_3; // Funcion 3 modo captura
+	 pin_configuration.Pinmode   =   PINSEL_PINMODE_PULLUP; // Pullup
 	 pin_configuration.OpenDrain =   PINSEL_PINMODE_NORMAL;
 
 	 PINSEL_ConfigPin(&pin_configuration);
@@ -111,7 +128,7 @@ void config_timer(){
 	TIM_CAPTURECFG_Type confCapture;
 
 	confCapture.CaptureChannel = 0;
-	confCapture.FallingEdge =  DISABLE; //Habilito la interrupcion por flanco de DESCENDENTE
+	confCapture.FallingEdge =  DISABLE; //D la interrupcion por flanco de DESCENDENTE
 	confCapture.RisingEdge  =  ENABLE;  //Habilito la interrupcion por flanco de ASCENDENTE
 	confCapture.IntOnCaption = ENABLE; //Habilito la interrupcion por flanco
 
