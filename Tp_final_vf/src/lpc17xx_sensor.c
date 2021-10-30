@@ -1,56 +1,4 @@
-/*
-===============================================================================
- Name        : liblcd.c
- Author      : $(author)
- Version     :
- Copyright   : $(copyright)
- Description : main definition
-===============================================================================
-*/
-
-#ifdef __USE_CMSIS
-#include "LPC17xx.h"
-#include "lpc17xx_pinsel.h"
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_timer.h"
-#include "lpc17xx_clkpwr.h"
-#include "lpc17xx_exti.h"
-#endif
-#include <cr_section_macros.h>
-#include <stdio.h>
-
-// TODO: insert other include files here
-#include "lpc17xx_i2c.h"
-#include <lpc17xx_lcd.h>
-// TODO: insert other definitions and declarations here
-void config_sensor();
-void confTimer1();
-int main(void) {
-	config_sensor();
-	I2C2_Stop();
-	conf_I2C_2();
-	confTimer1();
-	I2C2_enable();	//Refer to I2CONSET register
-	I2C2_Start();
-	lcd_init(0x4E, 16, 2);
-	lcd_backlight_led(ON);
-	//I2C2_Start();	//Refer to I2CONSET register
-    printf("Hello World\n");
-
-
-    while(1) {
-    	//lcd_clear();
-
-    	//lcd_gotoxy(3, 1);
-    	Activar_alarma();
-    	delay_ms(500);
-    	Desactivar_alarma();
-    	delay_ms(500);
-
-    	//lcd_backlight_led(OFF);
-    }
-    return 0 ;
-}
+#include "librerias.h"
 /*
  * Configuracion del sensor para la alarma.
  */
@@ -86,16 +34,20 @@ void config_sensor(){
 
 	EXTI_Config(&eint0Conf);
 	EXTI_ClearEXTIFlag(EXTI_EINT1);
-	NVIC_EnableIRQ(EINT1_IRQn);
+	NVIC_SetPriority(TIMER0_IRQn, 0);
+	NVIC_DisableIRQ(EINT1_IRQn);
+    //NVIC_EnableIRQ(EINT1_IRQn);
 }
 
 void EINT1_IRQHandler (void) {
+	if(LPC_SC->EXTINT &(1<<1)){
 	Disparar_alarma();
     LPC_TIM1->EMR |=(3<<4); //TOGGLE
     //LPC_TIM1->EMR &= ~((1<<4)|(1<<5)); //LOW
-
+     
 	//TIM_Cmd(LPC_TIM1, ENABLE);
 	//LPC_SC -> PCONP |= (1<<1);
+	}
     EXTI_ClearEXTIFlag(EXTI_EINT1);
 }
 
@@ -122,8 +74,3 @@ void confTimer1(void) {
     //NVIC_DisableIRQ(TIMER1_IRQn);
 	//NVIC_EnableIRQ(TIMER1_IRQn);
 }
-//void TIMER1_IRQHandler(void){
-//
-//TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
-//
-//}
