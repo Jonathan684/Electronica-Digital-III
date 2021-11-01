@@ -70,6 +70,7 @@ void confIntGPIO(void){
  */
 void EINT3_IRQHandler(void){
 	// COLUMNA 0
+
 	if((LPC_GPIOINT->IO2IntStatF) & (1<<4)){ //Pregunto si se interrumpio por el flanco descendente en el pin 4.
 		for (int nL = 0; nL < 4; nL++) // For para buscar la fila
 		{
@@ -77,10 +78,10 @@ void EINT3_IRQHandler(void){
 			//Barrido en columnas buscando un LOW
 			if (((LPC_GPIO2->FIOPIN) & (1<<4))) //Deberia entrar cada vez que esta en 1
 			{
-				//printf("Tecla: %c\n",teclas[nL][0]);
+				printf("Tecla: %c\n",teclas[nL][0]);
                 contraseña_aux[Incrementar] = teclas[nL][0];
 				Incrementar ++;
-				antirebote();
+
 				break;
 			}
 		}
@@ -93,10 +94,10 @@ void EINT3_IRQHandler(void){
              	    //Barrido en columnas buscando un LOW
                       if (((LPC_GPIO2->FIOPIN) & (1<<5))) //Deberia entrar cada vez que esta en 1
                         {
-                    	  //printf("Tecla: %c\n",teclas[nL][1]);
+                    	  printf("Tecla: %c\n",teclas[nL][1]);
                     	  contraseña_aux[Incrementar] = teclas[nL][1];
                     	  Incrementar ++;
-                    	  antirebote();
+                    	 // antirebote();
                      	break;
 
                }
@@ -110,11 +111,11 @@ void EINT3_IRQHandler(void){
                        	    //Barrido en columnas buscando un LOW
                                 if (((LPC_GPIO2->FIOPIN) & (1<<6))) //Deberia entrar cada vez que esta en 1
                                   {
-                                	//printf("Tecla: %c\n",teclas[nL][2]);
+                                	printf("Tecla: %c\n",teclas[nL][2]);
                                 	contraseña_aux[Incrementar] = teclas[nL][2];
                                 	Incrementar ++;
-                                	antirebote();
-                               	 antirebote();
+                                	//antirebote();
+                               	 //antirebote();
                           		 break;
                         		 }
                      }
@@ -128,16 +129,24 @@ void EINT3_IRQHandler(void){
 
 			   if (contraseña_activar[i] == contraseña_aux[i]) match ++;
 			   else{
-				   //printf("Incorrecto \n");
+				   printf("Incorrecto \n");
 				   break;
 			   }
 			}
 			if (match == 3){
 				printf("Correcto \n");
 				Activar_alarma();
+				/*
+				 * Controlamos si todos los sensores estan listo para activar la alarma.
+				 */
+				if((LPC_GPIO2-> FIOPIN &(1<<11))){
+					EXTI_ClearEXTIFlag(EXTI_EINT1);
+					Disparar_alarma();
+					LPC_TIM1->EMR |=(3<<4);
+				}
+
 				EXTI_ClearEXTIFlag(EXTI_EINT1);
 				NVIC_EnableIRQ(EINT1_IRQn);
-				//lcd.AlarmaActivada
 				a = 1;
 			}
 			
@@ -168,7 +177,7 @@ void EINT3_IRQHandler(void){
 		Incrementar = 0;
 		match = 0;
 	}
-
+	antirebote();
    LPC_GPIOINT->IO2IntClr |= (1<<4);   //Bajo la bandera
    LPC_GPIOINT->IO2IntClr |= (1<<5);
    LPC_GPIOINT->IO2IntClr |= (1<<6);
@@ -176,5 +185,5 @@ void EINT3_IRQHandler(void){
 
    }
 void antirebote(void){
-	for (int i;i<1000000;i++){}
+	for (int i;i<18000000;i++){}
 }
