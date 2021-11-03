@@ -6,25 +6,7 @@
 
 
 #include "librerias.h"
-//#include "LPC17xx.h"
-//#include "LPC17XX_pinsel.h"
-//#include "LPC17XX_gpio.h"
 
-
-/*
-# define PUERTO_0 (uint8_t)0
-# define PUERTO_1 (uint8_t)1
-# define PUERTO_2 (uint8_t)2
-# define PUERTO_3 (uint8_t)3
-
-# define SALIDA   (uint8_t)1
-# define ENTRADA  (uint8_t)0
-
-# define PIN_22   ((uint32_t)(1<<22))
-
-# define PIN_0   ((uint32_t)(1<<0))
-# define PIN_4   ((uint32_t)(1<<4))
-*/
 uint8_t a = 0;
 uint8_t d = 0;
 uint32_t pinesFilas[] = {0,1,2,3};
@@ -34,7 +16,7 @@ char teclas[4][3] = {{'1','2','3'},
                      {'7','8','9'},
                      {'*','0','#'}};
 
-char contraseña_activar[] = {'3','3','3'} ;
+char contraseña_activar[] = {'1','1','1'} ;
 char contraseña_desactivar[] = {'4','4','4'} ;
 char contraseña_aux[3];
 
@@ -51,7 +33,7 @@ void confGPIO(void){
 
     LPC_GPIO2->FIODIR    |= ((1<<0)|(1<<1)|(1<<2)|(1<<3)); //Pines 0,1,2,3 como salidas 4 Filas
     LPC_GPIO2->FIOCLR   |= ((1<<0)|(1<<1)|(1<<2)|(1<<3));  //Pongo un cero en la salida
-    LPC_GPIO2->FIODIR    &= ~((1<<4)|(1<<5)|(1<<6));          //Pines 4,5,6,7 como entradas    3 Columnas
+    LPC_GPIO2->FIODIR    &= ~((1<<4)|(1<<5)|(1<<6));        //Pines 4,5,6,7 como entradas    3 Columnas
 	LPC_PINCON->PINMODE4 &= ~((1<<4)|(1<<5)|(1<<6)); 	   //HABILITO LAS PULLUP para las columnas
 }
 /*
@@ -82,7 +64,7 @@ void EINT3_IRQHandler(void){
 				//printf("Tecla: %c\n",teclas[nL][0]);
 				lcd_clear();
 				LCD_PUTC(teclas[nL][0]);
-				for(int i =0;i<1000000;i++){}
+				for(int i =0;i<1000000;i++){} // 0.4 US * 1000000 // Tiempo para visualizar el numero en la pantalla
 				lcd_clear();
 				//Desactivar_alarma();
                 contraseña_aux[Incrementar] = teclas[nL][0];
@@ -155,18 +137,18 @@ void EINT3_IRQHandler(void){
 				/*
 				 * Controlamos si todos los sensores estan listo para activar la alarma.
 				 */
-				if((LPC_GPIO2-> FIOPIN &(1<<11))){
+				if((LPC_GPIO2-> FIOPIN &(1<<11))){ //Me fijo el estado del sensor(abierto o cerrado)
 					EXTI_ClearEXTIFlag(EXTI_EINT1);
 					Disparar_alarma();
-					LPC_TIM1->EMR |=(3<<4);
-					d = 1;
+					LPC_TIM1->EMR |=(3<<4); // Togle para el buz
+					d = 1;  // Variable para info en la lcd
 					a = 1;
 				}
 				else
 				{
 					EXTI_ClearEXTIFlag(EXTI_EINT1);
                     NVIC_EnableIRQ(EINT1_IRQn);
-					a = 1;
+					a = 1; 
 					d = 0;
 				}
 			}
@@ -199,18 +181,23 @@ void EINT3_IRQHandler(void){
 		Incrementar = 0;
 		match = 0;
 	}
+
+	
 	if(d == 1){
-		Disparar_alarma();
+		Disparar_alarma(); //muestro en pantalla
 	}
 	else if(a == 0){
-		Desactivar_alarma();
+		Desactivar_alarma();//muestro en pantalla
 	}
-	else Activar_alarma();
-	antirebote();
-   LPC_GPIOINT->IO2IntClr |= (1<<4);   //Bajo la bandera
+	else if(a == 1){
+		Activar_alarma();//muestro en pantalla
+	} 
+
+   antirebote(); // aprox 1 seg.
+   LPC_GPIOINT->IO2IntClr |= (1<<4);   //Bajo la bandera de las columnas
    LPC_GPIOINT->IO2IntClr |= (1<<5);
    LPC_GPIOINT->IO2IntClr |= (1<<6);
-   LPC_GPIO2->FIOCLR   |= ((1<<0)|(1<<1)|(1<<2)|(1<<3));
+   LPC_GPIO2->FIOCLR   |= ((1<<0)|(1<<1)|(1<<2)|(1<<3)); //Salidad en cero.
 
    }
 void antirebote(void){

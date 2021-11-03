@@ -16,7 +16,7 @@ int main(void) {
 	configGPIO ();
 	configTIMERS();
 	configIntExt();
-	//Sendor de puerta
+	//Sensor de puerta
 	confGPIO();
 	confIntGPIO();
     config_sensor();

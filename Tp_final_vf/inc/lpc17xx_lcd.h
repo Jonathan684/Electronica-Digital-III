@@ -1,14 +1,9 @@
 #ifndef LPC17XX_LCD_H_
 #define LPC17XX_LCD_H_
 
-
-//#include "lpc17xx_i2c.h"
 #include "librerias.h"
 #define ON                    1
 #define OFF                   0
-//Texto
-//char alarma_tex[] = {'A','L','A','R','M','A',' ','A','C','T','I','V','A','D','A'};
-//char alarma_tex[]  = {'A','L','A','R','M','A',' ','\b','A','C','T','I','V','A','D','A'};
 
 void Activar_alarma();
 void Desactivar_alarma();

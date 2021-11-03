@@ -1,82 +1,4 @@
-/*
-===============================================================================
- *  i2c_Flex_LCD.c
- *  Created on: 18 oct. 2021
- *  Author: Grupo II
-===============================================================================
- */
-// lcd_init() Must be called before any other function.
-//
-// lcd_putc(c) Will display c on the next position of the LCD.
-//
-//     \f Clear LCD display
-//     \n Set write position on next lcd line
-//     \b LCD backspace
-//     lcd_gotoxy(x,y) Set write position on LCD (upper left is 1,1)
-//
-// lcd_backlight_led(ON)/lcd_backlight_led(OFF) = Turn ON/OFF LCD Backlight LED
-//
-//-----------------------------------------------------------------------------
-// LCD pins D0-D3 are not used.
-//-----------------------------------------------------------------------------
-//
-// Comment   : Control of a compatible LCD (1...4 rows by 1...4 columns) from
-//              a bus I2C with an EXPANDER of I/O with connection I2C.
-//              The tests of these routines have been programmed using the IC
-//              Phillips PCF8574T. I've used 4 bits mode programming.
-//              The 8 bits mode programming is possible if you use 2 x PCF8574T.
-//              RW Pin is not being used.
-//
-// As defined in the following structure the pin connection is as follows:
-//
-//  PCF8574P     LCD
-//  ========     ======
-//     P0        RS
-//     P1        RW    (Not used!)
-//     P2        Enable
-//     P3        Led Backlight
-//     P4        D4
-//     P5        D5
-//     P6        D6
-//     P7        D7
-//
-//  The SCL and SDA pins should be pull-up resistor as shown below:
-//
-//             +5v
-//               |
-//               <
-//               > 4.7K
-//               <
-//To PIC         |          To i2c slave
-//pin xx ------------------ SDA pin
-//(SDA)
-//              +5v
-//               |
-//               <
-//               > 4.7K
-//               <
-//To PIC         |          To i2c slave
-//pin xx ------------------ SCL pin
-//(SCL)
-//
-//To PIC                    To i2c slave
-//Vss pin ----------------- Vss or ground pin
-//                |
-//              -----
-//               ---  Ground
-//                -
-//
-// THIS DOCUMENT IS PROVIDED TO THE USER "AS IS"
-//-----------------------------------------------------------------------------
-#include "LPC17xx.h"
 #include "librerias.h"
-//#include "lpc17xx_i2c.h"
-//#include "lpc17xx_lcd.h"
-
-//#include "lpc17xx_pinsel.h"
-//#include "lpc17xx_gpio.h"
-//#include "lpc17xx_clkpwr.h"
-//#include "lpc17xx_exti.h"
 
 #define      LCD_BACKLIGHT         0b00001000
 #define      RS                    0b00000001  //P0 - PCF8574T Pin connected to RS
@@ -123,9 +45,6 @@ void	conf_I2C_2(void) {
 	LPC_I2C2->I2SCLH = 60;	//100kHz from 12MHz
 	LPC_I2C2->I2SCLL = 60;	//100kHz from 12MHz
 }
-
-
-
 /*
  * Inicia el i2c
  */
@@ -207,8 +126,7 @@ void delay_us(int us)
 /*
  10ns
  1ms?
- 
- */
+*/
 void delay_ms(int t){
 	t = t*70009;
 	for(int i = 0; i<t;i++){};

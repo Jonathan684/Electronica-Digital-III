@@ -34,7 +34,7 @@ void config_sensor(){
 
 	EXTI_Config(&eint0Conf);
 	EXTI_ClearEXTIFlag(EXTI_EINT1);
-	NVIC_SetPriority(TIMER0_IRQn, 0);
+	NVIC_SetPriority(EINT1_IRQn, 0); // Mayor prioridad para el sensor de la puerta.
 	NVIC_DisableIRQ(EINT1_IRQn);
     //NVIC_EnableIRQ(EINT1_IRQn);
 }

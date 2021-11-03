@@ -56,12 +56,12 @@ void Set_UART3(void){
 	PINCFG.Pinnum = PINSEL_PIN_1; // pin 1 para RXD3 P0[1]== H[10]
 	PINSEL_ConfigPin(&PINCFG); // primero declaro el transmisor y luego el receptor
 
-	UART_ConfigStructInit(&UARTconfig); // usamos config por default
+	UART_ConfigStructInit(&UARTconfig); // usamos config por default 9600 baudios
 	UART_Init(LPC_UART3,&UARTconfig); //inicializo el uart segun los parametros
 	UART_FIFOConfigStructInit(&UARTFIFOconfig);
 	UART_FIFOConfig(LPC_UART3,&UARTFIFOconfig);
 	UART_TxCmd(LPC_UART3,ENABLE); //Habilito la funcion tx
-	LPC_UART3 -> IER|=(1<<0); // Interrumpe cuando recibe
+	LPC_UART3 -> IER|=(1<<0); 	  //Interrumpe cuando recibe
 
 }
 

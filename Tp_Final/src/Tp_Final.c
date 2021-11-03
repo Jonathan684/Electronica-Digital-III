@@ -34,7 +34,7 @@ int main(void) {
 	UART_TxCmd(LPC_UART3,ENABLE);
 	NVIC_EnableIRQ(UART3_IRQn);
 
-	while(1) {
+	while(1){
     }
     return 0 ;
 }
