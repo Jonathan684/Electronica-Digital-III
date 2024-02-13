@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "librerias.h": "c",
-        "lpc17xx_uart.h": "c",
-        "lpc17xx_sensor.h": "c",
-        "lpc17xx_control_canillas.h": "c"
-    }
-}
